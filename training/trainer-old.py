@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from databricks.sdk.runtime import * #added this import for running pyspark api
 import logging
 from functools import partial
 from pathlib import Path
@@ -86,7 +85,7 @@ def preprocess_batch(batch: Dict[str, List], tokenizer: AutoTokenizer, max_lengt
     )
 
 
-def load_training_dataset_old(path_or_dataset: str = DEFAULT_TRAINING_DATASET) -> Dataset: #not going to use this function
+def load_training_dataset(path_or_dataset: str = DEFAULT_TRAINING_DATASET) -> Dataset:
     logger.info(f"Loading dataset from {path_or_dataset}")
     dataset = load_dataset(path_or_dataset)["train"]
     logger.info("Found %d rows", dataset.num_rows)
@@ -95,47 +94,6 @@ def load_training_dataset_old(path_or_dataset: str = DEFAULT_TRAINING_DATASET) -
         instruction = rec["instruction"]
         response = rec["response"]
         context = rec.get("context")
-
-        if not instruction:
-            raise ValueError(f"Expected an instruction in: {rec}")
-
-        if not response:
-            raise ValueError(f"Expected a response in: {rec}")
-
-        # For some instructions there is an input that goes along with the instruction, providing context for the
-        # instruction.  For example, the input might be a passage from Wikipedia and the instruction says to extract
-        # some piece of information from it.  The response is that information to extract.  In other cases there is
-        # no input.  For example, the instruction might be open QA such as asking what year some historic figure was
-        # born.
-        if context:
-            rec["text"] = PROMPT_WITH_INPUT_FORMAT.format(instruction=instruction, response=response, input=context)
-        else:
-            rec["text"] = PROMPT_NO_INPUT_FORMAT.format(instruction=instruction, response=response)
-        return rec
-
-    dataset = dataset.map(_add_text)
-
-    return dataset
-
-def load_training_dataset() -> Dataset: #added, replace the old one
-    bird_df = spark.read.option("multiline","true").format("json").load("/FileStore/danny_wong/train.json")
-    bird_clean_df = (
-      bird_df.withColumnRenamed("SQL","response")
-      .withColumnRenamed("db_id", "category")
-      .withColumnRenamed("question", "instruction")
-      .withColumnRenamed("evidence", "context")
-      .drop("SQL_toks")
-      .drop("question_toks")
-      .drop("evidence_toks")
-    )
-    dataset = Dataset.from_spark(bird_clean_df)
-    # #logger.info("Found %d rows", dataset.num_rows)
-
-    def _add_text(rec):
-        instruction = rec["instruction"]
-        response = rec["response"]
-        #context = rec.get("context")
-        context = rec["context"]
 
         if not instruction:
             raise ValueError(f"Expected an instruction in: {rec}")
@@ -198,8 +156,7 @@ def preprocess_dataset(tokenizer: AutoTokenizer, max_length: int, seed=DEFAULT_S
         Dataset: HuggingFace dataset
     """
 
-    # dataset = load_training_dataset(training_dataset) #changed
-    dataset = load_training_dataset() #changed, hard-coded
+    dataset = load_training_dataset(training_dataset)
 
     logger.info("Preprocessing dataset")
     _preprocessing_function = partial(preprocess_batch, max_length=max_length, tokenizer=tokenizer)
