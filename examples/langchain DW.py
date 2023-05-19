@@ -181,7 +181,8 @@ engine = create_engine(
 
 
 db = SQLDatabase(engine, schema=None, include_tables=[table]) # schema=None to work around https://github.com/hwchase17/langchain/issues/2951 ?
-dolly_chain = SQLDatabaseChain.from_llm(hf_pipeline, db, verbose=True, use_query_checker=True, return_intermediate_steps=True)
+#dolly_chain = SQLDatabaseChain.from_llm(hf_pipeline, db, verbose=True, use_query_checker=True, return_intermediate_steps=True)
+dolly_chain = SQLDatabaseChain.from_llm(hf_pipeline, db, verbose=True, use_query_checker=True)
 #dolly_chain = SQLDatabaseChain(llm=hf_pipeline, database=db, verbose=True, use_query_checker=True, return_intermediate_steps=True)
 
 # COMMAND ----------
@@ -207,6 +208,41 @@ result
 # COMMAND ----------
 
 result = dolly_chain("How many records created after 2018?  The table name is gnaf_vic_gold.")
+result
+
+# COMMAND ----------
+
+result = dolly_chain("What is the most common street type?  Please use 'FROM gnaf_vic_gold' in the SQL query.")
+result
+
+# COMMAND ----------
+
+result = dolly_chain("What is the number of records with postcode 3128?  Please use 'FROM gnaf_vic_gold' in the SQL query.")
+result
+
+# COMMAND ----------
+
+type(result)
+
+# COMMAND ----------
+
+# MAGIC %pip install gradio
+
+# COMMAND ----------
+
+import gradio as gr
+
+def predict(prompt):
+    result = dolly_chain(prompt)
+    return result
+
+demo = gr.Interface(fn=predict, inputs="text", outputs="text")
+
+demo.launch(share=True, debug=True)
+
+# COMMAND ----------
+
+result = dolly_chain("What is the number of records with postcode 3128 FROM gnaf_vic_gold")
 result
 
 # COMMAND ----------
