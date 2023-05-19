@@ -13,6 +13,8 @@
 # limitations under the License.
 
 from databricks.sdk.runtime import * #added this import for running pyspark api
+from pyspark.sql.types import StringType #added
+from pyspark.sql.functions import col,lit #added
 import logging
 from functools import partial
 from pathlib import Path
@@ -128,7 +130,19 @@ def load_training_dataset() -> Dataset: #added, replace the old one
       .drop("question_toks")
       .drop("evidence_toks")
     )
-    dataset = Dataset.from_spark(bird_clean_df)
+    spider_df = spark.read.option("multiline","true").format("json").load("/FileStore/danny_wong/train_spider.json")
+    spider_clean_df = (
+      spider_df.withColumnRenamed("query","response")
+      .withColumnRenamed("db_id", "category")
+      .withColumnRenamed("question", "instruction")
+      .withColumn("context", lit(None).cast(StringType()))
+      .drop("query_toks")
+      .drop("question_toks")
+      .drop("query_toks_no_value")
+      .drop("sql")
+    )
+    bird_n_spider = bird_clean_df.unionByName(spider_clean_df)
+    dataset = Dataset.from_spark(bird_n_spider)
     # #logger.info("Found %d rows", dataset.num_rows)
 
     def _add_text(rec):

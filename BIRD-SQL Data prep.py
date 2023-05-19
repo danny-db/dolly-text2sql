@@ -41,9 +41,43 @@ display(bird_clean_df)
 
 # COMMAND ----------
 
+spider_df = spark.read.option("multiline","true").format("json").load("/FileStore/danny_wong/train_spider.json")
+
+display(spider_df)
+
+# COMMAND ----------
+
+from pyspark.sql.types import StringType
+from pyspark.sql.functions import col,lit
+
+spider_clean_df = (
+  spider_df.withColumnRenamed("query","response")
+  .withColumnRenamed("db_id", "category")
+  .withColumnRenamed("question", "instruction")
+  .withColumn("context", lit(None).cast(StringType()))
+  .drop("query_toks")
+  .drop("question_toks")
+  .drop("query_toks_no_value")
+  .drop("sql")
+)
+
+display(spider_clean_df)
+
+# COMMAND ----------
+
+bird_n_spider = bird_clean_df.unionByName(spider_clean_df)
+
+display(bird_n_spider)
+
+# COMMAND ----------
+
+bird_n_spider.count()
+
+# COMMAND ----------
+
 from datasets import Dataset
 
-bird_ds = Dataset.from_spark(bird_clean_df)
+bird_n_spider_ds = Dataset.from_spark(bird_n_spider)
 
 # COMMAND ----------
 

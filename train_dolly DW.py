@@ -69,6 +69,10 @@
 
 # COMMAND ----------
 
+# MAGIC %pip install bitsandbytes #added for 12B training
+
+# COMMAND ----------
+
 dbutils.library.restartPython() #added
 
 # COMMAND ----------

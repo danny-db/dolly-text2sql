@@ -41,12 +41,12 @@ dbutils.library.restartPython()
 
 # COMMAND ----------
 
-from training.generate import InstructionTextGenerationPipeline, load_model_tokenizer_for_generate
+# from training.generate import InstructionTextGenerationPipeline, load_model_tokenizer_for_generate
 
-# input_model = dbutils.widgets.get("input_model")
+# # input_model = dbutils.widgets.get("input_model")
 
-#model, tokenizer = load_model_tokenizer_for_generate(input_model)
-model, tokenizer = load_model_tokenizer_for_generate("/dbfs/dolly_training/dolly__2023-05-18T07:35:00") #hardcode
+# #model, tokenizer = load_model_tokenizer_for_generate(input_model)
+# model, tokenizer = load_model_tokenizer_for_generate("/dbfs/dolly_training/dolly__2023-05-19T02:17:04") #hardcode
 
 # COMMAND ----------
 
@@ -112,7 +112,8 @@ from training.generate import InstructionTextGenerationPipeline, load_model_toke
 input_model = dbutils.widgets.get("input_model")
 
 #model, tokenizer = load_model_tokenizer_for_generate(input_model)
-model, tokenizer = load_model_tokenizer_for_generate("/dbfs/dolly_training/dolly__2023-05-18T07:35:00")
+#model, tokenizer = load_model_tokenizer_for_generate("/dbfs/dolly_training/dolly__2023-05-18T07:35:00")
+model, tokenizer = load_model_tokenizer_for_generate("/dbfs/dolly_training/dolly__2023-05-19T02:17:04")
 
 # COMMAND ----------
 

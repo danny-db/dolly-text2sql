@@ -1,4 +1,5 @@
-DEFAULT_INPUT_MODEL = "EleutherAI/pythia-6.9b"
+#DEFAULT_INPUT_MODEL = "EleutherAI/pythia-6.9b"
+DEFAULT_INPUT_MODEL = "databricks/dolly-v2-12b"
 SUGGESTED_INPUT_MODELS = [
     "EleutherAI/pythia-2.8b",
     "EleutherAI/pythia-6.9b",
